@@ -24,16 +24,20 @@ def validate_test(test):
 
 
 def validate_password(password, confirm_password):
-    if password == confirm_password:
-        return True
+    return (password == confirm_password)
 
 
 def validate_email(email):
-    True
+    if "@" and "." not in email:
+        return True
+    if len(email) > 20:
+        return True
+    else:
+        return False
 
 
 def input_blank(test):
-    if test == ' ':
+    if test == '':
         return True
     else:
         return False
@@ -54,34 +58,44 @@ def validate_form():
     password_error = ''
     verify_error = ''
     email_error = ''
+
     error_check = False
 
     if validate_test(user_name):
         username_error = "That's not a valid username"
         error_check = True
-    
+
     if validate_test(password):
         password_error = "That's not a valid password"
         error_check = True
 
-    if validate_password(password, verify_password):
+    if password != verify_password:
         verify_error = "Passwords don't match"
         error_check = True
-    
-    if validate_email(email):
-        email_error = "That's not a valid email"
-        error_check = True
+
+    if email != '':
+        if validate_email(email):
+            email_error = "That's not a valid email"
+            error_check = True
 
     if error_check == False:
-        return redirect('/welcome')
+        return redirect('/welcome?username={0}'.format(user_name))
     else:
-        return render_template('/user_signup.html', username_error=username_error, password_error=password_error, verify_password=verify_error, email_error=email_error)
+        return render_template('/user_signup.html',
+                               username_error=username_error, 
+                               password_error=password_error, 
+                               verify_error=verify_error, 
+                               email_error=email_error,
+                               username=user_name,
+                               email=email)
 
 
 @app.route("/welcome")
 def welcome():
 
-    return render_template('welcome.html')
+    user_name = request.args.get('username')
+
+    return render_template('welcome.html', user_name=user_name)
 
 
 app.run()
